@@ -39,14 +39,6 @@ intt0:
 	mov P1, sec
 	mov P2, min
 	
-	/*
-	if (sec == 60){
-		min++;
-		sec = 0;
-	}
-	P1 = sec;
-	P2 = min;
-	*/
 	reti
 	
 END
