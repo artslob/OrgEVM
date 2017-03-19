@@ -1,41 +1,44 @@
 #include <reg51.h>
 
-
-main(){
-	while(1);
-}
-
-
-
-
-/*  version from nazariev(not working):
- 
-unsigned char f;
+unsigned char sec, min;
 
 intt0() interrupt 1 {
-	P1 = TH1;
-	P2 = TL1;
-	TH1 = 0;
-	TL1 = 0;
-	TH0 = -1;
-	TL0 = -1;
+	TH0 = 0x3C;
+	TL0 = 0xB0;
+	T1 = 1;
+	T1 = 0;
 }
+
+intt1() interrupt 3 {
+	TH1 = 0xFF;
+	TL1 = 0xEC;
+	sec++;
+	if (sec == 60){
+		min++;
+		sec = 0;
+	}
+	P1 = sec;
+	P2 = min;
+}
+
 
 main(){
-	TMOD = 21; 
-	// timer 0 16-bit
-	// C/T0 = 1, GATE0 = 1
-	// timer 1 16-bit
-				
-	TH0 = -1;
-	TL0 = -1; //timer0 = -1
+	//T0 & T1 are 16-bit
+	//C/T1: calc events on T1(P3.5)
+	TMOD = 0x51;
+	//enable T0 interrupts
+	ET0 = 1;
+	//enable T1 interrupts
+	ET1 = 1;
+	//run T0
+	TR0 = 1;
+	//run T1
+	TR1 = 1;
+	//enable all interrupts
+	EA = 1;
 	
-	TR1 = 1;  //tun timer 1
-	ET0 = 1;  //timer 0 interrupt on
-	EA = 1;   //all interrupts on
-	TR0 = 1;  //tun timer 0
-	IT0 = 1;  //interrupts on 1-0 int0(P3.2)
-	while(1) { }
+	TH1 = 0xFF;
+	TL1 = 0xEC;
+	
+	while(1);
 }
-
-*/
