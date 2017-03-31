@@ -7,10 +7,10 @@ char count;
 intt0() interrupt 0 {
 	TR0=0;
 	TR1=0;
-	if (TL0 < 110)
-		d[count++] = '0';
-	else
+	if (TL0 < 100)
 		d[count++] = '1';
+	else
+		d[count++] = '0';
 	
 	if (count == 8) {
 		count = 0; 
