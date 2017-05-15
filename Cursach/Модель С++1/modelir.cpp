@@ -603,15 +603,16 @@ void __fastcall TForm1::Button1Click(TObject *Sender) {
 	
 	//начальный адрес j-ой микропрограммы  RAMM=(j<<3).000, j=ADC[IR]
 	ADC[0x00] = 0; //команда NOP-->0
-	ADC[0x02] = 1; // команда ljmp ad   j=2
+	ADC[0x02] = 2; // команда ljmp ad   j=2
 	ADC[0x24] = 3; // add a,#d  j=3
 	ADC[0x22] = 4; // ret j=4
 
 	for(i = 0x28; i <= 0x2f; i++) //j=5 команда add a, ri
 		ADC[i] = 5;
 
-	for(uchar i = 0x11; i <= 0xF1; i = i + 0x20) // j=6 команды acall met
-		ADC[i] = 6;  
+	for(uchar i = 0x11; i < 0xF1; i = i + 0x20) // j=6 команды acall met
+		ADC[i] = 6;
+	ADC[0xF1] = 6; //в цикле происходит переполнение иначе
 
 	ADC[0x82] = 7;  // j=7 anl c, bit
 	ADC[0x32] = 8;  // j=8 reti
