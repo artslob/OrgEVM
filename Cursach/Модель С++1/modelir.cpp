@@ -584,35 +584,43 @@ void __fastcall TForm1::bitreg(uchar var)  //код var в строку Q[8]
          }
 
 uchar vector[0x10];
-void __fastcall TForm1::Button1Click(TObject *Sender)
-{ //функци€ клавиши  —брос
- uchar i;
- int k;
- // массив векторов ==========================
-   vector[0x1]=0x03; //int0
-   vector[0x2]=0x0b; //tf0
-   vector[0x4]=0x13; //int1
-   vector[0x8]=0x1b; //tf1
-   vector[0x10]=0x23; //T1 v R1
- // декодер сигналов записи в регистры Sfr
+void __fastcall TForm1::Button1Click(TObject *Sender) {
+	
+	//функци€ клавиши  —брос
+	uchar i;
+	int k;
+	// массив векторов ==========================
+	vector[0x1]=0x03; //int0
+	vector[0x2]=0x0b; //tf0
+	vector[0x4]=0x13; //int1
+	vector[0x8]=0x1b; //tf1
+	vector[0x10]=0x23; //T1 v R1
+	// декодер сигналов записи в регистры Sfr
 
- //--------------------------------------------
- for(k=0;k<0x100;k++)    //сброс декодера команд
-               ADC[k]=0;
- uchar j=0;  //команда NOP
- //начальный адрес j-ой микропрограммы  RAMM=(j<<3).000, j=ADC[IR]
- ADC[0]=j++; //команда NOP-->0
- ADC[1]=j++;
- ADC[02]=j++; // команда ljmp ad   j=2
- ADC[0x24]=j++; // add a,#d  j=3
- ADC[0x22]=j++; // ret j=4
+	//--------------------------------------------
+	for(k=0;k<0x100;k++)    //сброс декодера команд
+		ADC[k]=0;
+	
+	uchar j=0;  //команда NOP
+	//начальный адрес j-ой микропрограммы  RAMM=(j<<3).000, j=ADC[IR]
+	ADC[0]=j++; //команда NOP-->0
+	ADC[1]=j++;
+	ADC[02]=j++; // команда ljmp ad   j=2
+	ADC[0x24]=j++; // add a,#d  j=3
+	ADC[0x22]=j++; // ret j=4
 
- for(i=0x28;i<0x2f;i++) ADC[i]=j; j++;  //j=5 команда add a,ri
+	for(i = 0x28;i < 0x2f;i++) //j=5 команда add a, ri
+		ADC[i]=j; 
+	
+	j++;
 
-for(uchar i=0x11;i<0xF1;i=i+0x10) ADC[i]=j; j++;  // j=6 команды acall met
+	for(uchar i = 0x11;i < 0xF1;i = i + 0x10) // j=6 команды acall met
+		ADC[i]=j; 
+	
+	j++;  
 
-ADC[0x82]=j++;  // j=7 команда anl c, bit
-ADC[0x32]=j++; // reti   j=8;
+	ADC[0x82]=j++;  // j=7 команда anl c, bit
+	ADC[0x32]=j++; 	// reti   j=8;
 
 //сброс микропрограммной пам€ти и декодеров
 //---------------------------------------------
