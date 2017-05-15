@@ -601,26 +601,20 @@ void __fastcall TForm1::Button1Click(TObject *Sender) {
 	for(k=0;k<0x100;k++)    //сброс декодера команд
 		ADC[k]=0;
 	
-	uchar j=0;  //команда NOP
 	//начальный адрес j-ой микропрограммы  RAMM=(j<<3).000, j=ADC[IR]
-	ADC[0]=j++; //команда NOP-->0
-	ADC[1]=j++;
-	ADC[02]=j++; // команда ljmp ad   j=2
-	ADC[0x24]=j++; // add a,#d  j=3
-	ADC[0x22]=j++; // ret j=4
+	ADC[0x00] = 0; //команда NOP-->0
+	ADC[0x02] = 1; // команда ljmp ad   j=2
+	ADC[0x24] = 3; // add a,#d  j=3
+	ADC[0x22] = 4; // ret j=4
 
 	for(i = 0x28;i < 0x2f;i++) //j=5 команда add a, ri
-		ADC[i]=j; 
-	
-	j++;
+		ADC[i] = 5;
 
 	for(uchar i = 0x11;i < 0xF1;i = i + 0x10) // j=6 команды acall met
-		ADC[i]=j; 
-	
-	j++;  
+		ADC[i] = 6;  
 
-	ADC[0x82]=j++;  // j=7 команда anl c, bit
-	ADC[0x32]=j++; 	// reti   j=8;
+	ADC[0x82] = 7;  // j=7 anl c, bit
+	ADC[0x32] = 8;  // j=8 reti
 
 //сброс микропрограммной памяти и декодеров
 //---------------------------------------------
@@ -785,6 +779,31 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 			Instr->Text=StrCat(stroka,ss);
 			}
 			goto finish;
+		
+		//микропрограмма add a,#d
+		case 3:
+			// 3.1 -чтение операндов из АСС и памяти Code
+			{
+				PB=CODE[PC++]; RAMK++;
+				MicroCodMem("SelbusB=Code,Uniralu=WrpbUnicod16=Incpc ");
+				itoa(PB,&ss[0],16); //формирование мнемокода
+				char stroka[10]="add a,#";
+				Instr->Text=StrCat(stroka,ss);
+			}
+			//3.2 - - операция в АЛУ и формирование признаков результата
+			{
+				ACC=ACC+PB, RAMK++; Ram[Acc]=ACC;PSWC("add");
+				MicroCodMem("SelbusB=F,Mop=Add,Selpsw=Bitsw,Unibit=Wlocpsw,\
+				SelbusA=Asfr,Adsfr=Acc,Unibus8=Wram ");
+			}
+			//3.3
+			{
+				Ram[Psw]=PSW;  RAMK=0;
+				MicroCodMem("SelbusB=Psw,SelbusA=Asfr,Adsfr=Psw,Unibus8=Wram,\
+				Unicontr=Ramk1 ");
+			}
+			goto finish;
+		
 		//ret
         case 4: 
 			// 4.1 микрокоманда
@@ -808,6 +827,7 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 				Instr->Text = "ret";
 			}
 			goto finish;
+		
 		//микропрограмма add a,ri
         case 5:       
 			// 5.1 микрокоманда
@@ -838,29 +858,6 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 			}
 			goto finish;
 		
-		//микропрограмма add a,#d
-		case 3:
-			// 3.1 -чтение операндов из АСС и памяти Code
-			{
-				PB=CODE[PC++]; RAMK++;
-				MicroCodMem("SelbusB=Code,Uniralu=WrpbUnicod16=Incpc ");
-				itoa(PB,&ss[0],16); //формирование мнемокода
-				char stroka[10]="add a,#";
-				Instr->Text=StrCat(stroka,ss);
-			}
-			//3.2 - - операция в АЛУ и формирование признаков результата
-			{
-				ACC=ACC+PB, RAMK++; Ram[Acc]=ACC;PSWC("add");
-				MicroCodMem("SelbusB=F,Mop=Add,Selpsw=Bitsw,Unibit=Wlocpsw,\
-				SelbusA=Asfr,Adsfr=Acc,Unibus8=Wram ");
-			}
-			//3.3
-			{
-				Ram[Psw]=PSW;  RAMK=0;
-				MicroCodMem("SelbusB=Psw,SelbusA=Asfr,Adsfr=Psw,Unibus8=Wram,\
-				Unicontr=Ramk1 ");
-			}
-			goto finish;
 		// микропрограмма acall  met
 		case 6:        
 			//6.1 - чтение второго байта команды и преинкремент указателя
