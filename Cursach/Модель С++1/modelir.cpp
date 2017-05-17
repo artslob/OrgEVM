@@ -651,8 +651,8 @@ void __fastcall TForm1::Button1Click(TObject *Sender) {
  Ram[2] = 12;    //R2
  Ram[3] = 0xFF;  //R3
  
- Ram[Acc]=ACC=0x82;
- Ram[Psw]=PSW=0x80;
+ Ram[Acc]=ACC=0x00;
+ Ram[Psw]=PSW=0x00;
   //вывод битовой строки PSW
  bitreg(PSW);
   Edit1->Text=&Q[0];
