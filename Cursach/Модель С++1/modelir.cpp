@@ -644,10 +644,9 @@ void __fastcall TForm1::Button1Click(TObject *Sender) {
 //===================начальное состояние теневых и рабочих регистров
  Ram[Sp]=SP=07;
  
- Ram[0]=0x11; //значение R0
- Ram[1] = 2;
- Ram[2] = 12;
- Ram[3] = 0xFF;
+ Ram[1] = 2;     //R1
+ Ram[2] = 12;    //R2
+ Ram[3] = 0xFF;  //R3
  
  Ram[Acc]=ACC=0x82;
  Ram[Psw]=PSW=0x80;
@@ -1002,6 +1001,25 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 				Instr->Text="reti";
 				CheckBox9->State=cbUnchecked;
 			}
+			goto finish;
+			
+		//anl c, /bit
+		case 9:
+			{
+				Instr->Text = "anl c, /bit";				
+			}
+			goto finish;
+			
+		//mov a, rn
+		case 13:
+			{
+				Wrk = IR & 0x07;
+				itoa(Wrk, ss, 16);
+				char str[10] = "mov a, R";
+				Instr->Text = StrCat(str, ss);
+				Ram[Acc] = ACC = Ram[(PSW & 0x18) | (IR & 0x07)];
+			}
+			goto finish;
 
     //Вывод состояния регистров в HEX-коде
     finish: //возврат к контролю прерывания RAMK=-
