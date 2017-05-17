@@ -643,7 +643,12 @@ void __fastcall TForm1::Button1Click(TObject *Sender) {
  ROMM[k]=0;
 //===================начальное состояние теневых и рабочих регистров
  Ram[Sp]=SP=07;
+ 
  Ram[0]=0x11; //значение R0
+ Ram[1] = 2;
+ Ram[2] = 12;
+ Ram[3] = 0xFF;
+ 
  Ram[Acc]=ACC=0x82;
  Ram[Psw]=PSW=0x80;
   //вывод битовой строки PSW
@@ -697,7 +702,7 @@ void __fastcall TForm1::Button1Click(TObject *Sender) {
 	for(i=0;i<100;i++) 
 		CODE[i]=0;//сброс программной памяти
 
-	PC=0;
+	/*PC=0;
 	CODE[PC++]=0x02;
 	CODE[PC++]=0;
 	CODE[PC++]=0x23; //ljmp 23
@@ -716,7 +721,42 @@ void __fastcall TForm1::Button1Click(TObject *Sender) {
 	CODE[PC++]=0xe7; //anl ACC.7
 	CODE[PC++]=0x11; 
 	CODE[PC++]=0x22; //acall 0x22
-	CODE[PC++]=0;    //конец теста
+	CODE[PC++]=0;    //конец теста*/
+	
+	PC=0;
+	CODE[PC++]=0x02;
+	CODE[PC++]=0x00;
+	CODE[PC++]=0x20; //ljmp 20
+	CODE[0x03]= 0;
+	CODE[0x04]=0x32;  //reti  0
+	CODE[0x13]= 0;	  //nop
+	CODE[0x14]=0x32;  //reti 1
+
+	PC=0x20;
+	CODE[PC++]=0xEA;  //mov a, R2
+	CODE[PC++]=0x1A;  //dec r2
+	CODE[PC++]=0xE5;
+	CODE[PC++]=0x02;  //mov a, 2
+	CODE[PC++]=0x17;  //dec @R1
+	CODE[PC++]=0xE5;
+	CODE[PC++]=0x02;  //mov a, 2
+	CODE[PC++]=0x15;
+	CODE[PC++]=0x02;  //dec 2
+	CODE[PC++]=0xE5;
+	CODE[PC++]=0x02;  //mov a, 2
+	
+	CODE[PC++]=0xE5;
+	CODE[PC++]=0x03;  //mov a, 3
+	CODE[PC++]=0x24;
+	CODE[PC++]=0x01;  //add a, #1
+	CODE[PC++]=0xB0;
+	CODE[PC++]=0xE0;  //anl c, /ACC.0
+	CODE[PC++]=0x82;
+	CODE[PC++]=0xE0;  //anl c, ACC.0
+	
+	CODE[PC++]=0x60;
+	CODE[PC++]=0xEB;  //jz 0x20
+	
 }
 
  Instr->Clear();
