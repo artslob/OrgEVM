@@ -525,11 +525,12 @@ void __fastcall TForm1::PSWC(char *simv) //формирование слова состояния
     AnsiString Q,S;
 
     S.printf("%s",simv);
-    Q.printf("add  ");  //символов 7
-    if(S==Q)
-       { AB=ACC + PB; PSW= (AB&0x100)? PSW|0x80 : PSW&0x7f;  //C
-        PSW=((~(ACC^PB)&0x80)&(ACC^AB))? PSW|0x04 : PSW&0xfb; //OV
-        }
+    Q.printf("add");  //символов 7
+    if(S==Q) {
+		AB = ACC + PB;
+		PSW = (AB&0x100)? PSW|0x80 : PSW&0x7f;  //C
+        PSW = ((~(ACC^PB)&0x80)&(ACC^AB))? PSW|0x04 : PSW&0xfb; //OV
+    }
 
     Q.printf("subb  ");
     if(S==Q)
@@ -855,7 +856,10 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 			}
 			//3.2 - - операция в АЛУ и формирование признаков результата
 			{
-				ACC=ACC+PB, RAMK++; Ram[Acc]=ACC;PSWC("add");
+				PSWC("add");
+				ACC = ACC+PB;
+				RAMK++;
+				Ram[Acc] = ACC;
 				MicroCodMem("SelbusB=F,Mop=Add,Selpsw=Bitsw,Unibit=Wlocpsw,\
 				SelbusA=Asfr,Adsfr=Acc,Unibus8=Wram ");
 			}
