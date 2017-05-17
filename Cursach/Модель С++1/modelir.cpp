@@ -581,6 +581,9 @@ void __fastcall TForm1::bitreg(uchar var)  //код var в строку Q[8]
             bitreg(PSW);  //преобразование в битовую строку
             Edit1->Text=&Q[0];
             W7= (Wrk&0x80)? 1:0;  //Wrk[7]
+			ComboBox2->Clear();
+			for(char i=0; i<8; i++)
+               Reg(i);
          }
 
 uchar vector[0x10];
