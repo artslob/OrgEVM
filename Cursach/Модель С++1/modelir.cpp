@@ -1035,6 +1035,17 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 			}
 			goto finish;
 			
+		//dec addr8
+		case 12:
+			{
+				Wrk = CODE[PC++];
+				itoa(Wrk, ss, 16);
+				char str[10] = "dec ";
+				Instr->Text = StrCat(str, ss);
+				Ram[Wrk]--;
+			}
+			goto finish;
+			
 		//mov a, rn
 		case 13:
 			{
