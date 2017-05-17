@@ -616,6 +616,26 @@ void __fastcall TForm1::Button1Click(TObject *Sender) {
 
 	ADC[0x82] = 7;  // j=7 anl c, bit
 	ADC[0x32] = 8;  // j=8 reti
+	
+	/* below my code for implementation of 7 variant */
+	
+	ADC[0xB0] = 9;  // j=9 anl c, /bit
+	
+	for (i = 0x18; i <= 0x1F; i++){ //j=10 dec Rn
+		ADC[i] = 10;
+	}
+	
+	for (i = 0x16; i <= 0x17; i++){ //j=11 dec @Ri
+		ADC[i] = 11;
+	}
+	
+	ADC[0x15] = 12; //j=12 dec addr8
+	for (i = 0xE8; i <= 0xEF; i++){ //j=13 mov a, Rn
+		ADC[i] = 13;
+	}
+	ADC[0xE5] = 14; //j=14 mov a, addr8
+	ADC[0x60] = 15; //j=15 jz rel
+	
 
 //сброс микропрограммной памяти и декодеров
 //---------------------------------------------
