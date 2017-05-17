@@ -539,11 +539,15 @@ void __fastcall TForm1::PSWC(char *simv) //формирование слова состояния
         }
 
 
-    Q.printf("andc ");  //символов 7
+    Q.printf("andc");  //символов 7
     if(S==Q)
         PSW= (PB&(1<<(Wrk&0x7)))? PSW&0xff : PSW&0x7f; //c=c&bit
+	
+	Q.printf("andnotc");  //символов 7
+    if(S==Q)
+        PSW= (PB & (1 << (Wrk & 0x7))) ? PSW & 0x7f : PSW & 0xff; //c=c & !bit
 
-     (odd())? PSW|=1: PSW&=0xfe; //P
+    (odd())? PSW |= 1: PSW &= 0xfe; //P
 
 }
 
@@ -969,14 +973,15 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 			}
 			// 7.2 - если бит в SFR, то чтение бит адресуемого байта из SFR
 			{
-				if(W7)PB=Ram[Wrk&0xf8];
+				if(Wrk & 0x80) PB=Ram[Wrk&0xf8];
 				else  PB=Ram[0x20|((Wrk&0x78)>>3)]; RAMK++;
 				MicroCodMem("Selif=Wrk7,SelbusA=Abitwrk,SelbusB=Ram,Uniralu=Wrpb ");
 			}
 			// 7.3 - выполнение операции с битом С в PSW и битом из PB
 			// сохранение PSW в SFR по адресу Psw
 			{ 
-				char tt[]="andc "; PSWC(&tt[0]);
+				char tt[]="andc";
+				PSWC(&tt[0]);
 				MicroCodMem("Unibit=Bitand,Unibit=Wlocpsw,Selpsw=Bitsw ");
 			}
 			// 7.4 -
@@ -1012,9 +1017,32 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 			
 		//anl c, /bit
 		case 9:
+			// 7.1- чтение адреса бита из второго байта команды
 			{
-				Instr->Text = "anl c, /bit";				
+				Wrk=CODE[PC++]; RAMK++;
+				MicroCodMem("SelbusB=Code,Uniralu=Wrwrk,Unicod16=Incpc ");
+				ss[0]=(Wrk&0x7)+0x30; ss[1]=0; //формирование мнемокода
+				char stroka[12]="anl c, /Acc.";
+				Instr->Text=StrCat(stroka,ss);
 			}
+			// 7.2 - если бит в SFR, то чтение бит адресуемого байта из SFR
+			{
+				if(W7)PB=Ram[Wrk&0xf8];
+				else  PB=Ram[0x20|((Wrk&0x78)>>3)]; RAMK++;
+				MicroCodMem("Selif=Wrk7,SelbusA=Abitwrk,SelbusB=Ram,Uniralu=Wrpb ");
+			}
+			// 7.3 - выполнение операции с битом С в PSW и битом из PB
+			// сохранение PSW в SFR по адресу Psw
+			{ 
+				char tt[]="andnotc";
+				PSWC(&tt[0]);
+				MicroCodMem("Unibit=Bitand,Unibit=Wlocpsw,Selpsw=Bitsw ");
+			}
+			// 7.4 -
+			Ram[Psw]=PSW;
+			RAMK=0;
+			MicroCodMem("SelbusB=Psw,SelbusA=Asfr,Adsfr=Psw,\
+			Unibus8=WramNsfr,Unicontr=Ramk1 ");
 			goto finish;
 			
 		//dec Rn
@@ -1069,6 +1097,23 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 				char str[10] = "mov a, ";
 				Instr->Text = StrCat(str, ss);
 				Ram[Acc] = ACC = Ram[Wrk];
+			}
+			goto finish;
+			
+		//jz rel
+		case 15:
+			{
+				Wrk = CODE[PC++];
+				itoa(Wrk, ss, 16);
+				char str[10] = "jz ";
+				Instr->Text = StrCat(str, ss);
+				if (ACC == 0) {
+					if (Wrk & 0x80) {
+						Wrk = ~Wrk + 1;
+						PC -= Wrk;
+					}
+					else PC = PC + Wrk;
+				}
 			}
 			goto finish;
 
