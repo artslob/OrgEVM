@@ -583,6 +583,7 @@ void __fastcall TForm1::bitreg(uchar var)  //код var в строку Q[8]
             Acu->Text=itoa(ACC,stro,16);
             Work->Text=itoa(Wrk,stro,16);
             ProgCnt->Text=itoa(PC,stro,16);
+			odd()? PSW |= 1: PSW &= 0xfe; //P
             bitreg(PSW);  //преобразование в битовую строку
             Edit1->Text=&Q[0];
             W7= (Wrk&0x80)? 1:0;  //Wrk[7]
