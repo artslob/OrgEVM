@@ -683,62 +683,46 @@ void __fastcall TForm1::Button1Click(TObject *Sender) {
  for(i=0;i<16;i++) DCM1[i]=DCM2[i]=DCM3[i]=DCM4[i]=\
   DCM7[i]=DCM8[i]=0;
 
-//--------------------------------------------
- // тест-программа в памяти программ-----изм состояния---------
+	/*---------------------------------------------------------------
+	------------------тест-программа------------изм состояния--------
+																	
+	0:  ljmp start    	0x02	0x00  	0x20	PC = 0x20
+	03: nop           	0x00
+	04: reti          	0x32
+	13: nop           	0x00
+	14: reti          	0x32
 
- //0:  ljmp start    0x02 00  0x23     Pc=0x23   SP=07
- //03: nop           0x00
- //04: reti          0x32              PC=0x26   sp=07
- //13: nop           0x00
- //14: reti          0x32              Pc=0x28   sp=07
+	start:
+	20: mov a, r2       0xEA              		ACC = 12, PC = 0x21
+	21: dec r2     		0x1A         			R2 = 11, PC = 0x22
+	22: mov a, 0x02     0xE5	0x02          	ACC = 11, PSW = 0x01, PC = 0x24
+	24: dec @r1			0x17					R2 = 10, PC = 0x25
+	25: mov a, 0x02     0xE5	0x02          	ACC = 10, PSW = 0x00, PC = 0x27
+	27: dec 0x02     	0x15	0x02          	R2 = 9, PC = 0x29
+	29: mov a, 0x02     0xE5	0x02          	ACC = 9, PC = 0x2B
+	2B: mov a, 0x03     0xE5	0x03          	ACC = 0xFF, PC = 0x2D
+	2D: add a, #0x01    0x24	0x01          	ACC = 0x00, PSW = 0x80, PC = 0x2F
+	2F: anl c, /0xE0.0  0xB0	0xE0          	PC = 0x31
+	31: anl c, 0xE0.0   0x82	0xE0          	PSW = 0x00, PC = 0x33
+	31: jz start   		0x60	0xEB          	PC = 0x20
+	
+	-------------------программный код теста-------------------------
+	*/ 
 
- //mcal:
- //22: ret           0x22              Pc=0x2a   sp=07
- //start:                              acc=0x82  r0=0x21;
- //23: add a,#80     0x24 0x80         acc=0x02, PSW=0x81
- //25: nop           0x00              для прерываний
-                                   //(int0, stack=0026,PC=03)
-                                        //int1, stack=0026,PC=13)
- //26: add a,r0      0x28              acc=0x23,PSW=01
- //27: anl c,ACC.7   0x82 0xe7         PSW=01
- //29: acall mcal    0x11 0x22         PC=0x22, SP=0x09, Ram[sp]=00 2b
- //
- //2b: nop           0  //конец программы
- //=============================== программный код теста
-//if(CheckBox8->State==cbUnchecked)
 {  
 	for(i=0;i<100;i++) 
-		CODE[i]=0;//сброс программной памяти
-
-	/*PC=0;
-	CODE[PC++]=0x02;
-	CODE[PC++]=0;
-	CODE[PC++]=0x23; //ljmp 23
-	CODE[0x03]= 0;
-	CODE[0x04]=0x32;  //reti  0
-	CODE[0x13]= 0;	  //nop
-	CODE[0x14]=0x32;  //reti 1
-
-	PC=0x22;
-	CODE[PC++]=0x22;  //ret
-	CODE[PC++]=0x24; 
-	CODE[PC++]=0x80; //add a,#80
-	CODE[PC++]=0; //Nop для контроля прерываний
-	CODE[PC++]=0x28;  //add a,r0
-	CODE[PC++]=0x82;
-	CODE[PC++]=0xe7; //anl ACC.7
-	CODE[PC++]=0x11; 
-	CODE[PC++]=0x22; //acall 0x22
-	CODE[PC++]=0;    //конец теста*/
+		CODE[i] = 0;//сброс программной памяти
 	
-	PC=0;
+	PC = 0;
 	CODE[PC++]=0x02;
 	CODE[PC++]=0x00;
-	CODE[PC++]=0x20; //ljmp 20
-	CODE[0x03]= 0;
-	CODE[0x04]=0x32;  //reti  0
-	CODE[0x13]= 0;	  //nop
-	CODE[0x14]=0x32;  //reti 1
+	CODE[PC++]=0x20;  //ljmp 20
+	/* ie 0 */
+	CODE[0x03]=0x00;
+	CODE[0x04]=0x32;  //reti
+	/* ie 1 */
+	CODE[0x13]=0x00;  //nop
+	CODE[0x14]=0x32;  //reti
 
 	PC=0x20;
 	CODE[PC++]=0xEA;  //mov a, R2
