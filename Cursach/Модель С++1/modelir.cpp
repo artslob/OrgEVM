@@ -963,32 +963,23 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 			goto finish;
 			
 		case 7: //микропрограмма anl c,bit
-			// 7.1- чтение адреса бита из второго байта команды
 			{
-				Wrk=CODE[PC++]; RAMK++;
-				MicroCodMem("SelbusB=Code,Uniralu=Wrwrk,Unicod16=Incpc ");
-				ss[0]=(Wrk&0x7)+0x30; ss[1]=0; //формирование мнемокода
-				char stroka[12]="anl c,Acc.";
+				Wrk = CODE[PC++];
+				itoa(Wrk, ss, 16);
+				char stroka[12]="anl c, ";
 				Instr->Text=StrCat(stroka,ss);
+				uchar bit = 0;
+				if (Wrk & 0x80) { // bit in sfr
+					bit = ( Ram[ Wrk & 0xF8 ] >> (Wrk & 0x07) ) & 0x01;
+				}
+				else {
+					bit = ( Ram[ 0x20 | ((Wrk & 0x78) >> 3) ] >> (Wrk & 0x07) ) 
+							& 0x01;
+				}
+				if ( (PSW >> 0x07) & bit )
+					PSW |= 0x80;
+				else PSW &= 0x7F;
 			}
-			// 7.2 - если бит в SFR, то чтение бит адресуемого байта из SFR
-			{
-				if(Wrk & 0x80) PB=Ram[Wrk&0xf8];
-				else  PB=Ram[0x20|((Wrk&0x78)>>3)]; RAMK++;
-				MicroCodMem("Selif=Wrk7,SelbusA=Abitwrk,SelbusB=Ram,Uniralu=Wrpb ");
-			}
-			// 7.3 - выполнение операции с битом С в PSW и битом из PB
-			// сохранение PSW в SFR по адресу Psw
-			{ 
-				char tt[]="andc";
-				PSWC(&tt[0]);
-				MicroCodMem("Unibit=Bitand,Unibit=Wlocpsw,Selpsw=Bitsw ");
-			}
-			// 7.4 -
-			Ram[Psw]=PSW;
-			RAMK=0;
-			MicroCodMem("SelbusB=Psw,SelbusA=Asfr,Adsfr=Psw,\
-			Unibus8=WramNsfr,Unicontr=Ramk1 ");
 			goto finish;
 		
 		//reti
