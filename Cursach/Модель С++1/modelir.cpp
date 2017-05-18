@@ -1022,18 +1022,17 @@ void __fastcall TForm1::Button2Click(TObject *Sender)
 				itoa(Wrk, ss, 16);
 				char stroka[12]="anl c, /";
 				Instr->Text=StrCat(stroka,ss);
+				uchar bit = 0;
 				if (Wrk & 0x80) { // bit in sfr
-					uchar bit = ( Ram[ Wrk & 0xF8 ] >> (Wrk & 0x07) ) & 0x01;
-					if ( (PSW >> 0x07) & !bit )
-						PSW |= 0x80;
-					else PSW &= 0x7F;
-					/*
-					itoa(!bit, ss, 16);
-					Instr->Text=ss;*/
+					bit = ( Ram[ Wrk & 0xF8 ] >> (Wrk & 0x07) ) & 0x01;
 				}
 				else {
-					
+					bit = ( Ram[ 0x20 | ((Wrk & 0x78) >> 3) ] >> (Wrk & 0x07) ) 
+							& 0x01;
 				}
+				if ( (PSW >> 0x07) & !bit )
+					PSW |= 0x80;
+				else PSW &= 0x7F;
 			}
 			goto finish;
 			
